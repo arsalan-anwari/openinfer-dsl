@@ -1,6 +1,6 @@
 [package]
 name = "openinfer-dsl"
-version = "0.1.0"
+version = "0.1.3"
 edition = "2021"
 description = "Rust-embedded DSL for defining OpenInfer graphs with explicit control flow and memory semantics."
 license = "Apache-2.0"
