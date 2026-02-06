@@ -69,7 +69,4 @@ pub fn graph(input: TokenStream) -> TokenStream {
 }
 
 #[cfg(test)]
-include!(concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../tests/openinfer-dsl/parse_tests.rs"
-));
+mod parse_tests;
