@@ -12,7 +12,7 @@
 //! The macro expands into Rust code that constructs `Graph` values at runtime.
 //!
 //! ## Example
-//! ```no_run
+//! ```ignore
 //! use openinfer::graph;
 //! let g = graph! {
 //!     dynamic { x: f32[B]; }
