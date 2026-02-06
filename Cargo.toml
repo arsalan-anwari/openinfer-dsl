@@ -2,6 +2,10 @@
 name = "openinfer-dsl"
 version = "0.1.0"
 edition = "2021"
+description = "Rust-embedded DSL for defining OpenInfer graphs with explicit control flow and memory semantics."
+license = "Apache-2.0"
+repository = "https://github.com/arsalan-anwari/openinfer-dsl"
+readme = "README.md"
 
 [lib]
 proc-macro = true

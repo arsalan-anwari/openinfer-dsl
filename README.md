@@ -7,15 +7,11 @@ the simulator and later lowered by the synthesizer.
 ### Build
 ```bash
 cargo check
-```
-
-### Tests
-```bash
-cargo test
+cargo build -p openinfer-dsl
 ```
 
 ### Notes
 - This crate is a proc-macro and is consumed by `openinfer-simulator`.
 - Doctests are disabled (the examples depend on the simulator crate).
 
-Docs: https://github.com/arsalan-awnari/openinfer/tree/main/docs/sphinx/modules/openinfer-dsl
+Docs: docs.open-infer.nl
