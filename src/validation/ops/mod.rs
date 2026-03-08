@@ -47,7 +47,25 @@ impl SettingsMap {
 }
 
 fn attr_value_expr(setting: &OpSetting) -> syn::Result<TokenStream> {
-    if setting.name == "acc" || setting.name == "to" {
+    if setting.name == "acc" {
+        match &setting.value {
+            OpAttrValue::VarList(idents) => {
+                let dtypes = idents
+                    .iter()
+                    .map(match_dtype)
+                    .collect::<Result<Vec<_>, _>>()?;
+                return Ok(quote! { ::openinfer::AttrValue::DTypeList(vec![#(#dtypes),*]) });
+            }
+            _ => {
+                return Err(syn::Error::new(
+                    setting.name.span(),
+                    "acc must use list syntax: acc=[dtype, ...]",
+                ));
+            }
+        }
+    }
+
+    if setting.name == "to" {
         match &setting.value {
             OpAttrValue::Var(ident) => {
                 let dtype = match_dtype(ident)?;
@@ -56,7 +74,7 @@ fn attr_value_expr(setting: &OpSetting) -> syn::Result<TokenStream> {
             _ => {
                 return Err(syn::Error::new(
                     setting.name.span(),
-                    "acc must be a dtype identifier",
+                    "to must be a dtype identifier",
                 ));
             }
         }
@@ -104,6 +122,12 @@ fn attr_value_expr(setting: &OpSetting) -> syn::Result<TokenStream> {
         OpAttrValue::Var(ident) => {
             let s = ident.to_string();
             quote! { ::openinfer::AttrValue::Var(#s.to_string()) }
+        }
+        OpAttrValue::VarList(_) => {
+            return Err(syn::Error::new(
+                setting.name.span(),
+                "identifier lists are only allowed for acc",
+            ));
         }
     })
 }

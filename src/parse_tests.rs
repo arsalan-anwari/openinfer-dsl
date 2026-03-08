@@ -144,6 +144,50 @@ fn parses_op_attr_values() {
 }
 
 #[test]
+fn parses_acc_dtype_list_and_rejects_legacy_forms() {
+    let graph = parse_graph(
+        r#"
+        dynamic { x: i8[2, 2]; y: i8[2, 2]; }
+        volatile { out: i32[2, 2]; }
+        block entry {
+            op add(x, y, acc=[i16, i32]) >> out;
+            return;
+        }
+        "#,
+    );
+    let block = match &graph.sections[2] {
+        Section::Block(block) => block,
+        _ => panic!("expected block"),
+    };
+    let op = match &block.nodes[0] {
+        Node::Op(node) => node,
+        _ => panic!("expected op"),
+    };
+    let acc = op
+        .settings
+        .iter()
+        .find(|setting| setting.name == "acc")
+        .expect("acc setting missing");
+    assert!(matches!(acc.value, OpAttrValue::VarList(_)));
+
+    let scalar_err = parse_str::<GraphDsl>(
+        r#"
+        dynamic { x: i8[2, 2]; y: i8[2, 2]; }
+        volatile { out: i32[2, 2]; }
+        block entry {
+            op add(x, y, acc=i32) >> out;
+            return;
+        }
+        "#,
+    )
+    .err()
+    .expect("expected parse error");
+    assert!(scalar_err
+        .to_string()
+        .contains("acc must use list syntax: acc=[dtype, ...]"));
+}
+
+#[test]
 fn parses_cache_slices() {
     let graph = parse_graph(
         r#"

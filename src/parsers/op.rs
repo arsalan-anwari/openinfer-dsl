@@ -8,7 +8,11 @@ pub(crate) fn parse_op_arg(input: ParseStream) -> Result<OpArg> {
     let name: Ident = input.parse()?;
     if input.peek(Token![=]) {
         input.parse::<Token![=]>()?;
-        let value = parse_op_attr_value(input)?;
+        let value = if name == "acc" {
+            parse_acc_list_attr_value(input)?
+        } else {
+            parse_op_attr_value(input)?
+        };
         Ok(OpArg::Setting(OpSetting { name, value }))
     } else if input.peek(syn::token::Bracket) {
         let indices = parse_indices(input)?;
@@ -19,6 +23,29 @@ pub(crate) fn parse_op_arg(input: ParseStream) -> Result<OpArg> {
             indices: Vec::new(),
         }))
     }
+}
+
+fn parse_acc_list_attr_value(input: ParseStream) -> Result<OpAttrValue> {
+    if !input.peek(syn::token::Bracket) {
+        return Err(input.error("acc must use list syntax: acc=[dtype, ...]"));
+    }
+    let content;
+    syn::bracketed!(content in input);
+    if content.is_empty() {
+        return Err(content.error("acc list cannot be empty"));
+    }
+    let mut values = Vec::new();
+    while !content.is_empty() {
+        if !content.peek(Ident) {
+            return Err(content.error("acc list entries must be dtype identifiers"));
+        }
+        let ident: Ident = content.parse()?;
+        values.push(ident);
+        if content.peek(Token![,]) {
+            content.parse::<Token![,]>()?;
+        }
+    }
+    Ok(OpAttrValue::VarList(values))
 }
 
 pub(crate) fn parse_op_attr_value(input: ParseStream) -> Result<OpAttrValue> {

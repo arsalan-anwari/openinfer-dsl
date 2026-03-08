@@ -159,6 +159,7 @@ pub(crate) enum OpAttrValue {
     String(String),
     IntList(Vec<i64>),
     Var(Ident),
+    VarList(Vec<Ident>),
 }
 
 pub(crate) enum OpArg {
