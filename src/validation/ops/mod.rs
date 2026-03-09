@@ -61,6 +61,23 @@ fn attr_value_expr(setting: &OpSetting) -> syn::Result<TokenStream> {
             }
         }
     }
+    if setting.name == "acc" {
+        match &setting.value {
+            OpAttrValue::DTypeList(dtypes) => {
+                let exprs: Vec<TokenStream> = dtypes
+                    .iter()
+                    .map(|d| match_dtype(d))
+                    .collect::<syn::Result<Vec<_>>>()?;
+                return Ok(quote! { ::openinfer::AttrValue::DTypeList(vec![#(#exprs),*]) });
+            }
+            _ => {
+                return Err(syn::Error::new(
+                    setting.name.span(),
+                    "acc must be a dtype list (e.g. acc=[i32, i64])",
+                ));
+            }
+        }
+    }
 
     let value = &setting.value;
     Ok(match value {
@@ -109,6 +126,12 @@ fn attr_value_expr(setting: &OpSetting) -> syn::Result<TokenStream> {
             return Err(syn::Error::new(
                 setting.name.span(),
                 "identifier lists are not supported",
+            ));
+        }
+        OpAttrValue::DTypeList(_) => {
+            return Err(syn::Error::new(
+                setting.name.span(),
+                "DTypeList only supported for acc attribute",
             ));
         }
     })

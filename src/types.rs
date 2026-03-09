@@ -158,6 +158,7 @@ pub(crate) enum OpAttrValue {
     Bool(bool),
     String(String),
     IntList(Vec<i64>),
+    DTypeList(Vec<Ident>),
     Var(Ident),
     VarList(Vec<Ident>),
 }
